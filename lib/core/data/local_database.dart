@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 class LocalDatabase {
+ LocalDatabase({this.databasePath});
+ final String? databasePath;
  Database? _db;
  Future<void> open() async {if(_db!=null)return;final root=await getDatabasesPath();_db=await openDatabase(databasePath??p.join(root,'pawpal.db'),version:2,onCreate:(db,v)=>_create(db),onUpgrade:(db,old,v)async{if(old<2){await db.execute('CREATE TABLE IF NOT EXISTS preferences (key TEXT PRIMARY KEY, value TEXT NOT NULL)');}});}
  Future<void> _create(Database db)async{for(final table in ['pets','reminders','care_logs','pet_records','feeding_entries','activity_entries','contacts','checklists','favorites','collections','reading_history']){await db.execute('CREATE TABLE $table (id TEXT PRIMARY KEY, pet_id TEXT, payload TEXT NOT NULL, updated_at TEXT NOT NULL)');}await db.execute('CREATE INDEX idx_reminders_pet ON reminders(pet_id)');await db.execute('CREATE INDEX idx_logs_pet ON care_logs(pet_id)');await db.execute('CREATE TABLE preferences (key TEXT PRIMARY KEY, value TEXT NOT NULL)');}
