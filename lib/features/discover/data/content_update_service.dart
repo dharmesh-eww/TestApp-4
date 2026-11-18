@@ -1,4 +1,4 @@
-import 'dart:convert';import 'dart:io';import 'package:crypto/crypto.dart';import 'package:http/http.dart' as http;import 'package:path/path.dart' as p;import 'package:path_provider/path_provider.dart';
+import 'dart:convert';import 'dart:io';import 'dart:typed_data';import 'package:crypto/crypto.dart';import 'package:http/http.dart' as http;import 'package:path/path.dart' as p;import 'package:path_provider/path_provider.dart';
 class ContentUpdateException implements Exception{ContentUpdateException(this.message);final String message;@override String toString()=>message;}
 class ContentUpdateResult{const ContentUpdateResult({required this.version,required this.files,required this.updatedAt});final String version;final List<String> files;final DateTime updatedAt;}
 class ContentUpdateService{
