@@ -1,122 +1,63 @@
-import 'package:material_ui/material_ui.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+const green = Color(0xFF39845A), ink = Color(0xFF26332D), muted = Color(0xFF68756B), canvas = Color(0xFFFFF9F1), oat = Color(0xFFF5EFE5), line = Color(0xFFE8E1D7);
+void main() async { WidgetsFlutterBinding.ensureInitialized(); final db = PawStore(); await db.load(); runApp(ProviderScope(overrides: [storeProvider.overrideWith((ref) => db)], child: const PawPal())); }
+final storeProvider = ChangeNotifierProvider<PawStore>((ref) => PawStore());
+
+class Pet {
+  Pet(this.id, this.name, this.species, {this.breed='', this.notes='', this.weight='', this.birthday=''});
+  final String id; String name, species, breed, notes, weight, birthday;
+  Map<String,dynamic> json()=>{'id':id,'name':name,'species':species,'breed':breed,'notes':notes,'weight':weight,'birthday':birthday};
+  factory Pet.from(Map<String,dynamic> j)=>Pet(j['id'],j['name'],j['species'],breed:j['breed']??'',notes:j['notes']??'',weight:j['weight']??'',birthday:j['birthday']??'');
 }
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+class Task {
+  Task(this.id,this.petId,this.title,this.type,this.due,{this.repeat='Once',this.note='',this.done=false});
+  final String id; String petId,title,type,note,repeat; DateTime due; bool done;
+  Map<String,dynamic> json()=>{'id':id,'petId':petId,'title':title,'type':type,'due':due.toIso8601String(),'repeat':repeat,'note':note,'done':done};
+  factory Task.from(Map<String,dynamic> j)=>Task(j['id'],j['petId'],j['title'],j['type'],DateTime.parse(j['due']),repeat:j['repeat']??'Once',note:j['note']??'',done:j['done']??false);
 }
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
+class LogEntry {
+  LogEntry(this.id,this.petId,this.type,this.title,this.detail,this.at);
+  final String id; String petId,type,title,detail; DateTime at;
+  Map<String,dynamic> json()=>{'id':id,'petId':petId,'type':type,'title':title,'detail':detail,'at':at.toIso8601String()};
+  factory LogEntry.from(Map<String,dynamic> j)=>LogEntry(j['id'],j['petId'],j['type'],j['title'],j['detail']??'',DateTime.parse(j['at']));
 }
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
+class PawStore extends ChangeNotifier {
+  final pets=<Pet>[], tasks=<Task>[], logs=<LogEntry>[]; String? selected; String units='US customary';
+  Pet? get current { for(final p in pets){if(p.id==selected)return p;} return pets.isEmpty?null:pets.first; }
+  Future<void> load() async { final p=await SharedPreferences.getInstance(); final raw=p.getString('pawpal.local.v1'); if(raw==null)return; try {final j=jsonDecode(raw); pets.addAll((j['pets'] as List).map((e)=>Pet.from(Map<String,dynamic>.from(e)))); tasks.addAll((j['tasks'] as List).map((e)=>Task.from(Map<String,dynamic>.from(e)))); logs.addAll((j['logs'] as List).map((e)=>LogEntry.from(Map<String,dynamic>.from(e)))); selected=j['selected']; units=j['units']??units;}catch(_){ } }
+  Future<void> save() async {final p=await SharedPreferences.getInstance(); await p.setString('pawpal.local.v1',jsonEncode({'schemaVersion':1,'pets':pets.map((e)=>e.json()).toList(),'tasks':tasks.map((e)=>e.json()).toList(),'logs':logs.map((e)=>e.json()).toList(),'selected':selected,'units':units})); notifyListeners();}
+  Future<void> addPet(Pet p) async {pets.add(p);selected=p.id;await save();}
+  Future<void> addTask(Task t) async {tasks.add(t);await save();}
+  Future<void> addLog(LogEntry e) async {logs.add(e);await save();}
+  Future<void> deletePet(Pet p) async {pets.remove(p);tasks.removeWhere((e)=>e.petId==p.id);logs.removeWhere((e)=>e.petId==p.id);selected=pets.firstOrNull?.id;await save();}
+  Future<String> export() async=>const JsonEncoder.withIndent('  ').convert({'schemaVersion':1,'exportedAt':DateTime.now().toIso8601String(),'pets':pets.map((e)=>e.json()).toList(),'tasks':tasks.map((e)=>e.json()).toList(),'logs':logs.map((e)=>e.json()).toList()});
 }
+class PawPal extends StatelessWidget {const PawPal({super.key}); @override Widget build(BuildContext context)=>MaterialApp(title:'PawPal',debugShowCheckedModeBanner:false,themeMode:ThemeMode.light,theme:ThemeData(useMaterial3:true,brightness:Brightness.light,scaffoldBackgroundColor:canvas,colorScheme:ColorScheme.fromSeed(seedColor:green,brightness:Brightness.light),appBarTheme:const AppBarTheme(backgroundColor:canvas,foregroundColor:ink,elevation:0),textTheme:const TextTheme(titleLarge:TextStyle(color:ink,fontWeight:FontWeight.w800),bodyMedium:TextStyle(color:ink))),home:const Shell());}
+class Shell extends ConsumerStatefulWidget {const Shell({super.key}); @override ConsumerState<Shell> createState()=>_ShellState();}
+class _ShellState extends ConsumerState<Shell>{int tab=0; @override Widget build(BuildContext context){final pages=[const Home(),const Discover(),const Pets(),const Saved(),const Settings()];return Scaffold(body:SafeArea(child:IndexedStack(index:tab,children:pages)),bottomNavigationBar:NavigationBar(backgroundColor:Colors.white,selectedIndex:tab,onDestinationSelected:(v)=>setState(()=>tab=v),destinations:const [NavigationDestination(icon:Icon(Icons.home_outlined),label:'Home'),NavigationDestination(icon:Icon(Icons.explore_outlined),label:'Discover'),NavigationDestination(icon:Icon(Icons.pets_outlined),label:'My Pets'),NavigationDestination(icon:Icon(Icons.bookmark_border),label:'Saved'),NavigationDestination(icon:Icon(Icons.settings_outlined),label:'Settings') ]));}}
+class Home extends ConsumerWidget {const Home({super.key}); @override Widget build(BuildContext context,WidgetRef ref){final s=ref.watch(storeProvider),pet=s.current;final tasks=pet==null? <Task>[]:(s.tasks.where((t)=>t.petId==pet.id).toList()..sort((a,b)=>a.due.compareTo(b.due)));final now=DateTime.now();final today=tasks.where((t)=>t.due.year==now.year&&t.due.month==now.month&&t.due.day==now.day).toList();return ListView(padding:const EdgeInsets.all(20),children:[const Text('Good day, pet parent',style:TextStyle(color:muted)),const SizedBox(height:6),const Text('A little care goes a long way.',style:TextStyle(fontSize:25,fontWeight:FontWeight.w800,color:ink)),const SizedBox(height:20),if(pet==null) Empty(icon:Icons.pets,title:'Your pet’s story starts here',text:'Add a pet to organize routines, records and everyday care.',action:'Add your first pet',tap:()=>petForm(context,ref)) else ...[Section('Your pet',action:'Switch',tap:()=>choosePet(context,ref)),PetCard(pet,onTap:()=>choosePet(context,ref)),const SizedBox(height:20),Section('Today’s care',action:'Add reminder',tap:()=>taskForm(context,ref)),if(today.isEmpty) const Info('Nothing scheduled today. Create a routine when you are ready.') else ...today.map((t)=>TaskCard(t)),const SizedBox(height:18),const Section('Quick actions'),Row(children:[Expanded(child:ActionCard(Icons.alarm,'Reminder',()=>taskForm(context,ref))),const SizedBox(width:8),Expanded(child:ActionCard(Icons.edit_note,'Log care',()=>logForm(context,ref))),const SizedBox(width:8),Expanded(child:ActionCard(Icons.contact_phone,'Contacts',()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const Emergency()))))]),const SizedBox(height:20),const Section('Recent care notes'),...s.logs.where((e)=>e.petId==pet.id).toList().reversed.take(3).map((e)=>LogCard(e))],const SizedBox(height:16),const Info('PawPal is an organizer, not veterinary advice. For health concerns, contact your veterinarian.',icon:Icons.shield_outlined)]);}}
+class Pets extends ConsumerWidget {const Pets({super.key});@override Widget build(BuildContext context,WidgetRef ref){final s=ref.watch(storeProvider);return ListView(padding:const EdgeInsets.all(20),children:[Row(children:[const Expanded(child:Text('My pets',style:TextStyle(fontSize:28,fontWeight:FontWeight.w800,color:ink))),FilledButton.icon(onPressed:()=>petForm(context,ref),icon:const Icon(Icons.add),label:const Text('Add pet'))]),const SizedBox(height:14),if(s.pets.isEmpty)Empty(icon:Icons.pets,title:'No pets yet',text:'Create a private profile for your dog or cat.',action:'Add pet',tap:()=>petForm(context,ref)) else ...s.pets.map((p)=>Card(color:Colors.white,elevation:0,child:ListTile(leading:CircleAvatar(backgroundColor:oat,child:Icon(p.species=='Cat'?Icons.cruelty_free:Icons.pets,color:green)),title:Text(p.name,style:const TextStyle(fontWeight:FontWeight.bold)),subtitle:Text('${p.species} · ${p.breed.isEmpty?'Breed not set':p.breed}'),onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>PetDetail(p))))))]);}}
+class PetDetail extends ConsumerWidget {const PetDetail(this.pet,{super.key});final Pet pet;@override Widget build(BuildContext context,WidgetRef ref){final s=ref.watch(storeProvider);return Scaffold(appBar:AppBar(title:Text(pet.name),actions:[IconButton(onPressed:()=>petForm(context,ref,pet:pet),icon:const Icon(Icons.edit))]),body:ListView(padding:const EdgeInsets.all(20),children:[PetCard(pet,onTap:()=>s.save()),Section('Care schedule',action:'Add',tap:()=>taskForm(context,ref,pet:pet)),...s.tasks.where((t)=>t.petId==pet.id).map((t)=>TaskCard(t)),Section('Care timeline',action:'Log care',tap:()=>logForm(context,ref,pet:pet)),...s.logs.where((e)=>e.petId==pet.id).toList().reversed.map((e)=>LogCard(e)),Info('Breed: ${pet.breed}\nWeight: ${pet.weight}\nBirthday: ${pet.birthday}\n\n${pet.notes}'),const SizedBox(height:12),OutlinedButton.icon(onPressed:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const Emergency())),icon:const Icon(Icons.contact_phone),label:const Text('Emergency contacts')),TextButton(onPressed:()async{final yes=await confirm(context,'Delete ${pet.name}?','This also removes their local reminders and care notes.');if(yes) {await ref.read(storeProvider).deletePet(pet);if(context.mounted)Navigator.pop(context);}},child:const Text('Delete pet',style:TextStyle(color:Colors.red)))]));}}
+class Discover extends StatelessWidget {const Discover({super.key});@override Widget build(BuildContext context)=>ListView(padding:const EdgeInsets.all(20),children:[const Text('Discover',style:TextStyle(fontSize:28,fontWeight:FontWeight.w800,color:ink)),const SizedBox(height:8),const Text('Practical ideas for happier everyday care.',style:TextStyle(color:muted)),const SizedBox(height:16),const Info('Starter topic cards are bundled in this build. The read-only GitHub editorial catalog and validated offline updates are a follow-on integration.'),...<String>['Getting started','Feeding basics','Grooming','Positive-reinforcement training','Enrichment','Travel & seasonal safety','Senior pet comfort','Breed library'].map((v)=>Card(color:Colors.white,elevation:0,child:ListTile(leading:const Icon(Icons.menu_book_outlined,color:green),title:Text(v),trailing:const Icon(Icons.chevron_right),onTap:()=>showGuide(context,v))))]);}
+class Saved extends StatelessWidget {const Saved({super.key});@override Widget build(BuildContext context)=>const Padding(padding:EdgeInsets.all(20),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('Saved',style:TextStyle(fontSize:28,fontWeight:FontWeight.w800,color:ink)),SizedBox(height:16),Info('Saved guides, reading history and custom collections will be connected with the editorial content catalog.') ]));}
+class Settings extends ConsumerWidget {const Settings({super.key});@override Widget build(BuildContext context,WidgetRef ref){final s=ref.watch(storeProvider);return ListView(padding:const EdgeInsets.all(20),children:[const Text('Settings',style:TextStyle(fontSize:28,fontWeight:FontWeight.w800,color:ink)),const SizedBox(height:14),Card(color:Colors.white,elevation:0,child:Column(children:[ListTile(leading:const Icon(Icons.straighten,color:green),title:const Text('Units'),subtitle:Text(s.units),onTap:()async{final v=await showDialog<String>(context:context,builder:(c)=>SimpleDialog(title:const Text('Units'),children:['US customary','Metric'].map((u)=>SimpleDialogOption(onPressed:()=>Navigator.pop(c,u),child:Text(u))).toList()));if(v!=null){s.units=v;await s.save();}}),const Divider(height:1),ListTile(leading:const Icon(Icons.file_download_outlined,color:green),title:const Text('Export local data'),subtitle:const Text('Preview versioned JSON backup'),onTap:()async{final data=await s.export();if(context.mounted)showDialog(context:context,builder:(c)=>AlertDialog(title:const Text('Local backup preview'),content:SizedBox(width:420,child:SingleChildScrollView(child:SelectableText(data,style:const TextStyle(fontSize:11)))),actions:[TextButton(onPressed:()=>Navigator.pop(c),child:const Text('Close'))]));}),const Divider(height:1),const ListTile(leading:Icon(Icons.cloud_off,color:green),title:Text('Content updates'),subtitle:Text('No personal data is sent to content sources.')),const Divider(height:1),const ListTile(leading:Icon(Icons.lock_outline,color:green),title:Text('Privacy'),subtitle:Text('Profiles, reminders and notes are stored locally.')),const Divider(height:1),const ListTile(leading:Icon(Icons.light_mode_outlined,color:green),title:Text('Appearance'),subtitle:Text('PawPal uses a light-only appearance.'))]))]);}}
+class Emergency extends StatelessWidget {const Emergency({super.key});@override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Vet & emergency contacts')),body:ListView(padding:const EdgeInsets.all(20),children:const[Info('Add your veterinarian, nearest emergency clinic and trusted caregiver to your contact list. Contact-card editing is not yet included.',icon:Icons.contact_phone),SizedBox(height:12),Info('For an urgent concern, contact a veterinarian or local emergency veterinary clinic immediately. PawPal does not diagnose or triage.',icon:Icons.warning_amber)]));}
+
+Future<void> petForm(BuildContext context,WidgetRef ref,{Pet? pet})async{final name=TextEditingController(text:pet?.name??''),breed=TextEditingController(text:pet?.breed??''),weight=TextEditingController(text:pet?.weight??''),birthday=TextEditingController(text:pet?.birthday??''),notes=TextEditingController(text:pet?.notes??'');String species=pet?.species??'Dog';final ok=await showModalBottomSheet<bool>(context:context,isScrollControlled:true,backgroundColor:canvas,builder:(c)=>StatefulBuilder(builder:(c,set)=>Padding(padding:EdgeInsets.fromLTRB(20,20,20,MediaQuery.of(c).viewInsets.bottom+20),child:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(pet==null?'Add a pet':'Edit pet',style:const TextStyle(fontSize:23,fontWeight:FontWeight.w800)),const SizedBox(height:14),Field(name,'Pet name *'),const SizedBox(height:10),SegmentedButton<String>(segments:const[ButtonSegment(value:'Dog',label:Text('Dog')),ButtonSegment(value:'Cat',label:Text('Cat'))],selected:{species},onSelectionChanged:(v)=>set(()=>species=v.first)),const SizedBox(height:10),Field(breed,'Breed / mix / unknown'),const SizedBox(height:10),Field(birthday,'Birthday or estimated date (YYYY-MM-DD)'),const SizedBox(height:10),Field(weight,'Weight and unit'),const SizedBox(height:10),Field(notes,'Notes',lines:3),const SizedBox(height:8),const Text('Your profile stays on this device. Avoid storing unnecessary sensitive information.',style:TextStyle(color:muted,fontSize:12)),const SizedBox(height:16),SizedBox(width:double.infinity,child:FilledButton(onPressed:()=>Navigator.pop(c,name.text.trim().isNotEmpty),child:const Text('Save pet')))])))));if(ok==true){final s=ref.read(storeProvider);if(pet==null)await s.addPet(Pet(DateTime.now().microsecondsSinceEpoch.toString(),name.text.trim(),species,breed:breed.text.trim(),weight:weight.text.trim(),birthday:birthday.text.trim(),notes:notes.text.trim()));else{pet.name=name.text.trim();pet.species=species;pet.breed=breed.text.trim();pet.weight=weight.text.trim();pet.birthday=birthday.text.trim();pet.notes=notes.text.trim();await s.save();}}}
+Future<void> taskForm(BuildContext context,WidgetRef ref,{Pet? pet})async{final s=ref.read(storeProvider);if(s.pets.isEmpty){await petForm(context,ref);return;}final title=TextEditingController(),note=TextEditingController();String pid=pet?.id??s.current!.id,type='Feeding',repeat='Once';DateTime due=DateTime.now().add(const Duration(hours:1));final ok=await showModalBottomSheet<bool>(context:context,isScrollControlled:true,backgroundColor:canvas,builder:(c)=>StatefulBuilder(builder:(c,set)=>Padding(padding:EdgeInsets.fromLTRB(20,20,20,MediaQuery.of(c).viewInsets.bottom+20),child:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,crossAxisAlignment:CrossAxisAlignment.start,children:[const Text('New reminder',style:TextStyle(fontSize:23,fontWeight:FontWeight.w800)),DropdownButtonFormField<String>(value:pid,decoration:const InputDecoration(labelText:'Pet'),items:s.pets.map((p)=>DropdownMenuItem(value:p.id,child:Text(p.name))).toList(),onChanged:(v)=>set(()=>pid=v!),),const SizedBox(height:10),Field(title,'Task title *'),const SizedBox(height:10),DropdownButtonFormField<String>(value:type,decoration:const InputDecoration(labelText:'Task type'),items:['Feeding','Water','Walk','Grooming','Nail trim','Dental routine','Training','Appointment','Vaccination follow-up','Medication (owner-entered)','Custom'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>set(()=>type=v!)),ListTile(contentPadding:EdgeInsets.zero,title:const Text('Date & time'),subtitle:Text(due.toLocal().toString().substring(0,16)),onTap:()async{final d=await showDatePicker(context:c,initialDate:due,firstDate:DateTime(2020),lastDate:DateTime(2100));if(d!=null){final t=await showTimePicker(context:c,initialTime:TimeOfDay.fromDateTime(due));set(()=>due=DateTime(d.year,d.month,d.day,t?.hour??due.hour,t?.minute??due.minute));}}),DropdownButtonFormField<String>(value:repeat,decoration:const InputDecoration(labelText:'Repeat'),items:['Once','Daily','Weekly','Monthly'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>set(()=>repeat=v!)),const SizedBox(height:10),Field(note,'Owner notes (optional)',lines:2),const SizedBox(height:8),const Text('Medication reminders must follow instructions from your veterinarian. PawPal never suggests doses or schedules.',style:TextStyle(color:muted,fontSize:12)),const SizedBox(height:14),SizedBox(width:double.infinity,child:FilledButton(onPressed:()=>Navigator.pop(c,title.text.trim().isNotEmpty),child:const Text('Save reminder')))])))));if(ok==true)await s.addTask(Task(DateTime.now().microsecondsSinceEpoch.toString(),pid,title.text.trim(),type,due,repeat:repeat,note:note.text.trim()));}
+Future<void> logForm(BuildContext context,WidgetRef ref,{Pet? pet})async{final s=ref.read(storeProvider);if(s.pets.isEmpty){await petForm(context,ref);return;}final title=TextEditingController(),detail=TextEditingController();String pid=pet?.id??s.current!.id,type='Feeding';final ok=await showModalBottomSheet<bool>(context:context,isScrollControlled:true,backgroundColor:canvas,builder:(c)=>StatefulBuilder(builder:(c,set)=>Padding(padding:EdgeInsets.fromLTRB(20,20,20,MediaQuery.of(c).viewInsets.bottom+20),child:SingleChildScrollView(child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('Log care',style:TextStyle(fontSize:23,fontWeight:FontWeight.w800)),DropdownButtonFormField<String>(value:pid,decoration:const InputDecoration(labelText:'Pet'),items:s.pets.map((p)=>DropdownMenuItem(value:p.id,child:Text(p.name))).toList(),onChanged:(v)=>set(()=>pid=v!)),const SizedBox(height:10),DropdownButtonFormField<String>(value:type,decoration:const InputDecoration(labelText:'Entry type'),items:['Weight','Feeding','Activity','Grooming','Training','Behavior observation','Vet visit','Vaccination','Preventive care','Medication administered (owner-recorded)','Custom'].map((v)=>DropdownMenuItem(value:v,child:Text(v))).toList(),onChanged:(v)=>set(()=>type=v!)),const SizedBox(height:10),Field(title,'What happened? *'),const SizedBox(height:10),Field(detail,'Amount, duration or notes',lines:3),const SizedBox(height:8),const Text('Entries are owner-recorded and are not medically verified.',style:TextStyle(color:muted,fontSize:12)),const SizedBox(height:14),SizedBox(width:double.infinity,child:FilledButton(onPressed:()=>Navigator.pop(c,title.text.trim().isNotEmpty),child:const Text('Save entry')))])))));if(ok==true)await s.addLog(LogEntry(DateTime.now().microsecondsSinceEpoch.toString(),pid,type,title.text.trim(),detail.text.trim(),DateTime.now()));}
+void choosePet(BuildContext context,WidgetRef ref){final s=ref.read(storeProvider);showModalBottomSheet(context:context,builder:(c)=>SafeArea(child:Column(mainAxisSize:MainAxisSize.min,children:[const Padding(padding:EdgeInsets.all(18),child:Text('Choose a pet',style:TextStyle(fontWeight:FontWeight.bold))),...s.pets.map((p)=>ListTile(title:Text(p.name),subtitle:Text(p.species),onTap:(){s.selected=p.id;s.save();Navigator.pop(c);} ))])));}
+void showGuide(BuildContext context,String title)=>showModalBottomSheet(context:context,backgroundColor:canvas,builder:(c)=>Padding(padding:const EdgeInsets.all(24),child:Column(mainAxisSize:MainAxisSize.min,crossAxisAlignment:CrossAxisAlignment.start,children:[Text(title,style:const TextStyle(fontSize:22,fontWeight:FontWeight.w800)),const SizedBox(height:12),const Text('Build a gentle, repeatable routine. Keep sessions positive and adapt to the individual animal. For health questions, consult your veterinarian.'),const SizedBox(height:16),FilledButton(onPressed:()=>Navigator.pop(c),child:const Text('Close'))])));
+Future<bool> confirm(BuildContext c,String title,String body)async=>(await showDialog<bool>(context:c,builder:(d)=>AlertDialog(title:Text(title),content:Text(body),actions:[TextButton(onPressed:()=>Navigator.pop(d,false),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(d,true),child:const Text('Delete'))])))??false;
+class PetCard extends StatelessWidget{const PetCard(this.pet,{required this.onTap});final Pet pet;final VoidCallback onTap;@override Widget build(BuildContext context)=>InkWell(onTap:onTap,child:Container(padding:const EdgeInsets.all(18),decoration:BoxDecoration(color:const Color(0xFFEAF2E8),borderRadius:BorderRadius.circular(20)),child:Row(children:[CircleAvatar(radius:30,backgroundColor:Colors.white,child:Icon(pet.species=='Cat'?Icons.cruelty_free:Icons.pets,color:green,size:28)),const SizedBox(width:14),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(pet.name,style:const TextStyle(fontSize:20,fontWeight:FontWeight.w800,color:ink)),Text('${pet.species} · ${pet.breed.isEmpty?'Breed not set':pet.breed}',style:const TextStyle(color:muted)),const Text('Tap to switch pet',style:TextStyle(color:green,fontSize:12))])),const Icon(Icons.expand_more,color:green)])));}
+class TaskCard extends ConsumerWidget{const TaskCard(this.task,{super.key});final Task task;@override Widget build(BuildContext context,WidgetRef ref)=>Card(color:Colors.white,elevation:0,child:CheckboxListTile(value:task.done,activeColor:green,title:Text(task.title,style:TextStyle(fontWeight:FontWeight.w700,decoration:task.done?TextDecoration.lineThrough:null)),subtitle:Text('${task.type} · ${task.due.hour.toString().padLeft(2,'0')}:${task.due.minute.toString().padLeft(2,'0')} · ${task.repeat}'),onChanged:(_){task.done=!task.done;ref.read(storeProvider).save();}));}
+class LogCard extends StatelessWidget{const LogCard(this.entry,{super.key});final LogEntry entry;@override Widget build(BuildContext context)=>Card(color:Colors.white,elevation:0,child:ListTile(leading:const Icon(Icons.notes,color:green),title:Text(entry.title,style:const TextStyle(fontWeight:FontWeight.w700)),subtitle:Text('${entry.type} · ${entry.at.toLocal().toString().substring(0,16)}${entry.detail.isEmpty?'':'\n'+entry.detail}')));}
+class Section extends StatelessWidget{const Section(this.title,{this.action,this.tap});final String title;final String? action;final VoidCallback? tap;@override Widget build(BuildContext context)=>Padding(padding:const EdgeInsets.only(bottom:10),child:Row(children:[Expanded(child:Text(title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w800,color:ink))),if(action!=null)TextButton(onPressed:tap,child:Text(action!,style:const TextStyle(color:green)))]));}
+class ActionCard extends StatelessWidget{const ActionCard(this.icon,this.title,this.tap);final IconData icon;final String title;final VoidCallback tap;@override Widget build(BuildContext context)=>InkWell(onTap:tap,child:Container(padding:const EdgeInsets.symmetric(vertical:15),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(15),border:Border.all(color:line)),child:Column(children:[Icon(icon,color:green),const SizedBox(height:6),Text(title,style:const TextStyle(fontSize:12,fontWeight:FontWeight.w700))])));}
+class Info extends StatelessWidget{const Info(this.text,{this.icon=Icons.info_outline});final String text;final IconData icon;@override Widget build(BuildContext context)=>Container(padding:const EdgeInsets.all(16),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(16),border:Border.all(color:line)),child:Row(crossAxisAlignment:CrossAxisAlignment.start,children:[Icon(icon,color:green),const SizedBox(width:10),Expanded(child:Text(text,style:const TextStyle(color:muted,height:1.4)))]));}
+class Empty extends StatelessWidget{const Empty({required this.icon,required this.title,required this.text,required this.action,required this.tap});final IconData icon;final String title,text,action;final VoidCallback tap;@override Widget build(BuildContext context)=>Container(padding:const EdgeInsets.all(22),decoration:BoxDecoration(color:Colors.white,borderRadius:BorderRadius.circular(18),border:Border.all(color:line)),child:Column(children:[Icon(icon,color:green,size:34),const SizedBox(height:10),Text(title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w800,color:ink)),const SizedBox(height:6),Text(text,textAlign:TextAlign.center,style:const TextStyle(color:muted)),const SizedBox(height:14),FilledButton(onPressed:tap,child:Text(action))]));}
+class Field extends StatelessWidget{const Field(this.controller,this.label,{this.lines=1});final TextEditingController controller;final String label;final int lines;@override Widget build(BuildContext context)=>TextField(controller:controller,maxLines:lines,decoration:InputDecoration(labelText:label,filled:true,fillColor:Colors.white,border:OutlineInputBorder(borderRadius:BorderRadius.circular(13),borderSide:const BorderSide(color:line))));}
