@@ -82,7 +82,16 @@ class PawRepository {
     final preferences=<String,dynamic>{};
     for(final entry in rawPreferences.entries){
       if(entry.key is! String||!allowed.contains(entry.key)||entry.value is! String)throw FormatException('Unsupported preference entry.');
-      final key=entry.key as String;final value=entry.value as String;if((key=='quiet_hours_start'||key=='quiet_hours_end')&&!RegExp(r'^(?:[01]\\d|2[0-3]):[0-5]\\d
+      final key=entry.key as String;
+      final value=entry.value as String;
+      if(key=='quiet_hours_start'||key=='quiet_hours_end'){
+        final parts=value.split(':');
+        final hour=parts.length==2?int.tryParse(parts[0]):null;
+        final minute=parts.length==2?int.tryParse(parts[1]):null;
+        if(hour==null||minute==null||hour<0||hour>23||minute<0||minute>59)throw FormatException('Invalid quiet-hours time.');
+      }
+      if(key=='quiet_hours_enabled'&&!['0','1'].contains(value))throw FormatException('Invalid quiet-hours preference.');
+      preferences[key]=value;
     }
     final selected=preferences['selected_pet'];
     if(selected is String&&selected.isNotEmpty&&!petIds.contains(selected))throw FormatException('Selected pet is not present in this backup.');
