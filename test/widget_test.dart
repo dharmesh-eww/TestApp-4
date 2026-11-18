@@ -4,6 +4,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:pawpal/app/pawpal_app.dart';
 import 'package:pawpal/core/data/local_database.dart';
 import 'package:pawpal/core/providers/app_providers.dart';
+import 'package:pawpal/core/data/paw_repository.dart';
+import 'package:pawpal/core/domain/pet.dart';
+import 'package:pawpal/core/domain/care_entities.dart';
 import 'package:pawpal/features/care/domain/reminder_recurrence.dart';
 
 void main() {
@@ -11,7 +14,7 @@ void main() {
   setUp(() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-    database = LocalDatabase(databasePath: inMemoryDatabasePath);
+    database = LocalDatabase(databasePath: ':memory:');
     await database.open();
   });
   tearDown(() async => database.close());
@@ -44,3 +47,27 @@ void main() {
     expect(ReminderRecurrence.next(start, 'monthly'), DateTime(2026, 2, 28, 9));
   });
 }
+
+  test('SQLite backup round-trip is versioned and omits private attachment paths', () async {
+    final repository = PawRepository(database);
+    final pet = Pet(id: 'pet-1', name: 'Milo', species: 'Dog', photoPath: '/private/photo.jpg');
+    await repository.save('pets', pet.toMap());
+    final reminder = Reminder(id: 'reminder-1', petId: pet.id, title: 'Walk', category: 'Walk', dueAt: DateTime(2026, 11, 19, 8));
+    await repository.save('reminders', reminder.toMap());
+    final backup = await repository.exportAll();
+    expect(backup, contains('"schema_version": 2'));
+    expect(backup, isNot(contains('/private/photo.jpg')));
+    final validated = await repository.validateImport(backup);
+    expect(validated['pets'], hasLength(1));
+    expect(validated['reminders'], hasLength(1));
+    await repository.restore(validated, replaceExisting: true);
+    expect(await repository.list('pets'), hasLength(1));
+  });
+
+  test('legacy v1 backup is upgraded to the current schema', () async {
+    final repository = PawRepository(database);
+    const legacy = '{"schemaVersion":1,"selected":"pet-legacy","units":"US customary","pets":[{"id":"pet-legacy","name":"Milo","species":"Dog","breed":"Mix","birthday":"2020-01-01","weight":"20","notes":"Friendly"}],"tasks":[{"id":"task-1","petId":"pet-legacy","title":"Dinner","type":"Feeding","due":"2026-11-19T18:00:00.000","repeat":"Daily","done":false,"note":""}],"logs":[]}';
+    final validated = await repository.validateImport(legacy);
+    expect(validated['pets'], hasLength(1));
+    expect(validated['reminders'], hasLength(1));
+  });
