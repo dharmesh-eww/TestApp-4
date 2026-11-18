@@ -11,7 +11,7 @@ class AppController extends ChangeNotifier {
  final PawRepository repository;
  final Map<String,List<Map<String,dynamic>>> _data={};
  String? selectedPetId;String weightUnit='lb',distanceUnit='mi',temperatureUnit='°F',locale='en-US';
- bool onboardingComplete=false,quietHoursEnabled=false;bool _notificationsSynced=false;String quietStart='22:00',quietEnd='07:00';
+ bool isLoaded=false;bool onboardingComplete=false,quietHoursEnabled=false;bool _notificationsSynced=false;String quietStart='22:00',quietEnd='07:00';
  List<Pet> get pets=>(_data['pets']??[]).map((e)=>Pet.fromMap(Map<String,Object?>.from(e))).toList();
  Pet? get selectedPet {for(final p in pets){if(p.id==selectedPetId&&!p.archived)return p;}return pets.where((p)=>!p.archived).firstOrNull;}
  List<Map<String,dynamic>> items(String table)=>List.unmodifiable(_data[table]??const []);
