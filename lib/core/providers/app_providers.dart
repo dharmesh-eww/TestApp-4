@@ -8,7 +8,7 @@ import '../domain/care_entities.dart';
 import '../../features/care/domain/reminder_recurrence.dart';
 import '../services/local_notification_service.dart';
 final databaseProvider=Provider<LocalDatabase>((ref)=>throw UnimplementedError());
-final appControllerProvider=ChangeNotifierProvider<AppController>((ref){final c=AppController(PawRepository(ref.watch(databaseProvider)));ref.onDispose(c.dispose);return c;});
+final appControllerProvider=ChangeNotifierProvider<AppController>((ref){final c=AppController(PawRepository(ref.watch(databaseProvider)));return c;});
 class AppController extends ChangeNotifier {
  AppController(this.repository){refresh();}
  final PawRepository repository;
