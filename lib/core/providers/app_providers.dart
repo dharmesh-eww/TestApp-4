@@ -40,5 +40,5 @@ class AppController extends ChangeNotifier {
  Future<void> clearAllLocalData()async{await LocalNotificationService.instance.cancelAll();await repository.db.clearAll();await repository.db.setPreference('legacy_preferences_migrated','1');await LocalAttachmentService().clearAll();await ContentUpdateService().clearCache();selectedPetId=null;_data.clear();isLoaded=true;onboardingComplete=false;notifyListeners();}
  Future<String> exportData()=>repository.exportAll();
  Future<Map<String,List<Map<String,dynamic>>>> validateBackup(String source)=>repository.validateImport(source);
- Future<void> restoreBackup(Map<String,List<Map<String,dynamic>>> data,{required bool replaceExisting})async{await repository.restore(data,replaceExisting:replaceExisting);await refresh();}
+ Future<void> restoreBackup(Map<String,List<Map<String,dynamic>>> data,{required bool replaceExisting})async{await LocalNotificationService.instance.cancelAll();await repository.restore(data,replaceExisting:replaceExisting);await refresh();await resyncNotifications();}
 }
