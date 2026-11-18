@@ -8,6 +8,7 @@ import '../domain/care_entities.dart';
 import '../../features/care/domain/reminder_recurrence.dart';
 import '../services/local_notification_service.dart';
 import '../services/local_attachment_service.dart';
+import '../../features/discover/data/content_update_service.dart';
 final databaseProvider=Provider<LocalDatabase>((ref)=>throw UnimplementedError());
 final appControllerProvider=ChangeNotifierProvider<AppController>((ref){final c=AppController(PawRepository(ref.watch(databaseProvider)));return c;});
 class AppController extends ChangeNotifier {
@@ -28,6 +29,8 @@ class AppController extends ChangeNotifier {
  Future<void> selectPet(String? id)async{selectedPetId=id;if(id==null){notifyListeners();return;}await repository.db.setPreference('selected_pet',id);notifyListeners();}
  Future<void> saveUnits({String? weight,String? distance,String? temperature})async{if(weight!=null)weightUnit=weight;if(distance!=null)distanceUnit=distance;if(temperature!=null)temperatureUnit=temperature;await repository.db.setPreference('weight_unit',weightUnit);await repository.db.setPreference('distance_unit',distanceUnit);await repository.db.setPreference('temperature_unit',temperatureUnit);notifyListeners();}
  Future<void> completeOnboarding()async{onboardingComplete=true;await repository.db.setPreference('onboarding_complete','1');notifyListeners();}
+ Future<void> clearReadingHistory()async{await repository.db.clearTable('reading_history');await refresh();}
+ Future<void> clearAllLocalData()async{await repository.db.clearAll();await LocalAttachmentService().clearAll();await ContentUpdateService().clearCache();selectedPetId=null;_data.clear();isLoaded=true;onboardingComplete=false;notifyListeners();}
  Future<String> exportData()=>repository.exportAll();
  Future<Map<String,List<Map<String,dynamic>>>> validateBackup(String source)=>repository.validateImport(source);
  Future<void> restoreBackup(Map<String,List<Map<String,dynamic>>> data,{required bool replaceExisting})async{await repository.restore(data,replaceExisting:replaceExisting);await refresh();}
