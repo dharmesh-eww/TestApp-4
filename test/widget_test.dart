@@ -46,7 +46,6 @@ void main() {
     final start = DateTime(2026, 1, 31, 9);
     expect(ReminderRecurrence.next(start, 'monthly'), DateTime(2026, 2, 28, 9));
   });
-}
 
   test('SQLite backup round-trip is versioned and omits private attachment paths', () async {
     final repository = PawRepository(database);
@@ -82,3 +81,4 @@ void main() {
     final start = DateTime(2026, 1, 31, 9);
     expect(ReminderRecurrence.next(start, 'monthly', monthEndPolicy: 'skip'), DateTime(2026, 3, 31, 9));
   });
+}
