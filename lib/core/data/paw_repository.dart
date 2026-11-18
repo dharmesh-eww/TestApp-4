@@ -82,7 +82,33 @@ class PawRepository {
     final preferences=<String,dynamic>{};
     for(final entry in rawPreferences.entries){
       if(entry.key is! String||!allowed.contains(entry.key)||entry.value is! String)throw FormatException('Unsupported preference entry.');
-      preferences[entry.key as String]=entry.value;
+      final key=entry.key as String;final value=entry.value as String;if((key=='quiet_hours_start'||key=='quiet_hours_end')&&!RegExp(r'^(?:[01]\\d|2[0-3]):[0-5]\\d
+    }
+    final selected=preferences['selected_pet'];
+    if(selected is String&&selected.isNotEmpty&&!petIds.contains(selected))throw FormatException('Selected pet is not present in this backup.');
+    result['__preferences__']=[preferences];
+    return result;
+  }
+
+  Future<void> restore(Map<String,List<Map<String,dynamic>>> records,{required bool replaceExisting}) async {
+    await db.restoreAll(records,replaceExisting:replaceExisting);
+  }
+
+  Future<String> exportAll() async {
+    final data=<String,dynamic>{'schema_version':2,'app':'PawPal','exported_at':DateTime.now().toUtc().toIso8601String()};
+    for(final table in tables){
+      final rows=await list(table);
+      for(final row in rows){if(row.containsKey('photoPath'))row['photoPath']='';if(row.containsKey('attachmentPath'))row['attachmentPath']='';}
+      data[table]=rows;
+    }
+    const keys=['selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated','quiet_hours_enabled','quiet_hours_start','quiet_hours_end'];
+    final preferences=<String,String>{};
+    for(final key in keys){final value=await db.getPreference(key);if(value!=null)preferences[key]=value;}
+    data['preferences']=preferences;
+    return const JsonEncoder.withIndent('  ').convert(data);
+  }
+}
+).hasMatch(value))throw FormatException('Invalid quiet-hours time.');if(key=='quiet_hours_enabled'&&!['0','1'].contains(value))throw FormatException('Invalid quiet-hours preference.');preferences[key]=value;
     }
     final selected=preferences['selected_pet'];
     if(selected is String&&selected.isNotEmpty&&!petIds.contains(selected))throw FormatException('Selected pet is not present in this backup.');
