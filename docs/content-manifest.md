@@ -55,7 +55,8 @@ The current app reads `articles/index.json` with `schema_version: 1` and an `art
 - `id`, `title`, `summary`
 - `species`, `tags`, `reading_minutes`
 - `review_status`, `reviewer`, `reviewed_at`, `updated_at`, `safety_level`
-- `sources`: an array of `{ title, url }` citations. URLs must use HTTPS.\n- `body_blocks`: an array of `paragraph`, `heading`, or `callout` blocks with a `text` field.
+- `sources`: an array of `{ title, url }` citations. URLs must use HTTPS.
+- `body_blocks`: an array of `paragraph`, `heading`, or `callout` blocks with a `text` field.
 
 Starter articles are explicitly marked `editorial_review_required`. Do not mark medical or safety content as reviewed unless the named qualified reviewer has actually reviewed it. Include sources and review metadata in the editorial workflow before publishing production content.
 
