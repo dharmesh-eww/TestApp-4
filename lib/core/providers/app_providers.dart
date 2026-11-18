@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import '../data/local_database.dart';
 import '../data/paw_repository.dart';
@@ -38,7 +39,7 @@ class AppController extends ChangeNotifier {
  Future<void> saveUnits({String? weight,String? distance,String? temperature})async{if(weight!=null)weightUnit=weight;if(distance!=null)distanceUnit=distance;if(temperature!=null)temperatureUnit=temperature;await repository.db.setPreference('weight_unit',weightUnit);await repository.db.setPreference('distance_unit',distanceUnit);await repository.db.setPreference('temperature_unit',temperatureUnit);notifyListeners();}
  Future<void> completeOnboarding()async{onboardingComplete=true;await repository.db.setPreference('onboarding_complete','1');notifyListeners();}
  Future<void> clearReadingHistory()async{await repository.db.clearTable('reading_history');await refresh();}
- Future<void> clearAllLocalData()async{await LocalNotificationService.instance.cancelAll();await repository.db.clearAll();await repository.db.setPreference('legacy_preferences_migrated','1');await LocalAttachmentService().clearAll();await ContentUpdateService().clearCache();selectedPetId=null;_data.clear();migrationWarning=null;isLoaded=true;onboardingComplete=false;notifyListeners();}
+ Future<void> clearAllLocalData()async{await LocalNotificationService.instance.cancelAll();await repository.db.clearAll();await repository.db.setPreference('legacy_preferences_migrated','1');final legacyPrefs=await SharedPreferences.getInstance();await legacyPrefs.remove('pawpal.local.v1');await LocalAttachmentService().clearAll();await ContentUpdateService().clearCache();selectedPetId=null;_data.clear();migrationWarning=null;isLoaded=true;onboardingComplete=false;notifyListeners();}
  Future<String> exportData()=>repository.exportAll();
  Future<Map<String,List<Map<String,dynamic>>>> validateBackup(String source)=>repository.validateImport(source);
  Future<void> restoreBackup(Map<String,List<Map<String,dynamic>>> data,{required bool replaceExisting})async{await LocalNotificationService.instance.cancelAll();await repository.restore(data,replaceExisting:replaceExisting);await refresh();await resyncNotifications();}
