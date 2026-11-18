@@ -21,5 +21,5 @@ class AppController extends ChangeNotifier {
  Future<void> selectPet(String? id)async{selectedPetId=id;if(id==null){notifyListeners();return;}await repository.db.setPreference('selected_pet',id);notifyListeners();}
  Future<void> saveUnits({String? weight,String? distance,String? temperature})async{if(weight!=null)weightUnit=weight;if(distance!=null)distanceUnit=distance;if(temperature!=null)temperatureUnit=temperature;await repository.db.setPreference('weight_unit',weightUnit);await repository.db.setPreference('distance_unit',distanceUnit);await repository.db.setPreference('temperature_unit',temperatureUnit);notifyListeners();}
  Future<void> completeOnboarding()async{onboardingComplete=true;await repository.db.setPreference('onboarding_complete','1');notifyListeners();}
- Future<String> exportData()=>repository.exportAll();
+ Future<String> exportData()=>repository.exportAll();\n Future<Map<String,List<Map<String,dynamic>>>> validateBackup(String source)=>repository.validateImport(source);\n Future<void> restoreBackup(Map<String,List<Map<String,dynamic>>> data,{required bool replaceExisting})async{await repository.restore(data,replaceExisting:replaceExisting);await refresh();}
 }
