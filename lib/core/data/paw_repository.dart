@@ -76,6 +76,7 @@ class PawRepository {
         if(['reminders','care_logs','pet_records','feeding_entries','activity_entries'].contains(table)&&petId==null)throw FormatException('A $table entry must reference a pet.');
       }
     }
+    for(final reminder in result['reminders']??const []){if(reminder['title'] is! String||(reminder['title'] as String).trim().isEmpty||DateTime.tryParse(reminder['dueAt']?.toString()??'')==null||!['once','daily','weekly','weekdays','monthly','interval'].contains(reminder['repeat'])||(reminder['intervalDays'] is! int)||(reminder['intervalDays'] as int)<1||(reminder['intervalDays'] as int)>365||!['last_day','skip'].contains(reminder['monthEndPolicy']))throw FormatException('Invalid reminder data.');final days=(reminder['weekdays']?.toString()??'').split(',').where((e)=>e.isNotEmpty).map(int.tryParse).toList();if(days.any((e)=>e==null||e<1||e>7))throw FormatException('Invalid reminder weekday selection.');}
     final rawPreferences=root['preferences']??const {};
     if(rawPreferences is! Map)throw FormatException('Invalid preferences section.');
     const allowed={'selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated','quiet_hours_enabled','quiet_hours_start','quiet_hours_end'};
