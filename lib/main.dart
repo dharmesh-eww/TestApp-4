@@ -33,7 +33,7 @@ class PawStore extends ChangeNotifier {
   Future<void> addPet(Pet p) async {pets.add(p);selected=p.id;await save();}
   Future<void> addTask(Task t) async {tasks.add(t);await save();}
   Future<void> addLog(LogEntry e) async {logs.add(e);await save();}
-  Future<void> deletePet(Pet p) async {pets.remove(p);tasks.removeWhere((e)=>e.petId==p.id);logs.removeWhere((e)=>e.petId==p.id);selected=pets.firstOrNull?.id;await save();}
+  Future<void> deletePet(Pet p) async {pets.remove(p);tasks.removeWhere((e)=>e.petId==p.id);logs.removeWhere((e)=>e.petId==p.id);selected=pets.isEmpty?null:pets.first.id;await save();}
   Future<String> export() async=>const JsonEncoder.withIndent('  ').convert({'schemaVersion':1,'exportedAt':DateTime.now().toIso8601String(),'pets':pets.map((e)=>e.json()).toList(),'tasks':tasks.map((e)=>e.json()).toList(),'logs':logs.map((e)=>e.json()).toList()});
 }
 class PawPal extends StatelessWidget {const PawPal({super.key}); @override Widget build(BuildContext context)=>MaterialApp(title:'PawPal',debugShowCheckedModeBanner:false,themeMode:ThemeMode.light,theme:ThemeData(useMaterial3:true,brightness:Brightness.light,scaffoldBackgroundColor:canvas,colorScheme:ColorScheme.fromSeed(seedColor:green,brightness:Brightness.light),appBarTheme:const AppBarTheme(backgroundColor:canvas,foregroundColor:ink,elevation:0),textTheme:const TextTheme(titleLarge:TextStyle(color:ink,fontWeight:FontWeight.w800),bodyMedium:TextStyle(color:ink))),home:const Shell());}
