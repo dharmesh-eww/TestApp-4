@@ -71,3 +71,14 @@ void main() {
     expect(validated['pets'], hasLength(1));
     expect(validated['reminders'], hasLength(1));
   });
+
+  test('interval and selected weekday recurrence advance correctly', () {
+    final monday = DateTime(2026, 11, 16, 9);
+    expect(ReminderRecurrence.next(monday, 'interval', intervalDays: 3), DateTime(2026, 11, 19, 9));
+    expect(ReminderRecurrence.next(monday, 'weekdays', weekdays: [1, 3]), DateTime(2026, 11, 18, 9));
+  });
+
+  test('monthly skip policy skips a missing calendar day', () {
+    final start = DateTime(2026, 1, 31, 9);
+    expect(ReminderRecurrence.next(start, 'monthly', monthEndPolicy: 'skip'), DateTime(2026, 3, 31, 9));
+  });
