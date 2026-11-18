@@ -1,4 +1,5 @@
-import 'dart:convert';\nimport 'package:path/path.dart' as p;
+import 'dart:convert';
+import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 class LocalDatabase {
  Database? _db;
