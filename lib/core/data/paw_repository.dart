@@ -78,7 +78,7 @@ class PawRepository {
     }
     final rawPreferences=root['preferences']??const {};
     if(rawPreferences is! Map)throw FormatException('Invalid preferences section.');
-    const allowed={'selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated'};
+    const allowed={'selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated','quiet_hours_enabled','quiet_hours_start','quiet_hours_end'};
     final preferences=<String,dynamic>{};
     for(final entry in rawPreferences.entries){
       if(entry.key is! String||!allowed.contains(entry.key)||entry.value is! String)throw FormatException('Unsupported preference entry.');
@@ -101,7 +101,7 @@ class PawRepository {
       for(final row in rows){if(row.containsKey('photoPath'))row['photoPath']='';if(row.containsKey('attachmentPath'))row['attachmentPath']='';}
       data[table]=rows;
     }
-    const keys=['selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated'];
+    const keys=['selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated','quiet_hours_enabled','quiet_hours_start','quiet_hours_end'];
     final preferences=<String,String>{};
     for(final key in keys){final value=await db.getPreference(key);if(value!=null)preferences[key]=value;}
     data['preferences']=preferences;
