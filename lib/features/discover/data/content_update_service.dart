@@ -18,8 +18,6 @@ class ContentUpdateService{
   return ContentUpdateResult(version:version,files:downloads.keys.toList(),updatedAt:DateTime.now());
  }
  Future<void> clearCache()async{final appDir=await getApplicationSupportDirectory();final root=Directory(p.join(appDir.path,'pawpal','content'));if(await root.exists())await root.delete(recursive:true);}
- Future<File?> activeFile(String relativePath)async{if(relativePath.startsWith('/')||relativePath.split('/').contains('..'))return null;final appDir=await getApplicationSupportDirectory();final root=Directory(p.join(appDir.path,'pawpal','content'));final pointer=File(p.join(root.path,'active.txt'));if(!await pointer.exists())return null;final version=(await pointer.readAsString()).trim();if(!RegExp(r'^[A-Za-z0-9._-]+
-}
-).hasMatch(version))return null;final file=File(p.join(root.path,version,relativePath));return await file.exists()?file:null;}
+ Future<File?> activeFile(String relativePath)async{if(relativePath.startsWith('/')||relativePath.split('/').contains('..'))return null;final appDir=await getApplicationSupportDirectory();final root=Directory(p.join(appDir.path,'pawpal','content'));final pointer=File(p.join(root.path,'active.txt'));if(!await pointer.exists())return null;final version=(await pointer.readAsString()).trim();if(version.isEmpty||version.contains(RegExp(r'[^A-Za-z0-9._-]')))return null;final file=File(p.join(root.path,version,relativePath));return await file.exists()?file:null;}
  Future<void> close()async=>_client.close();
 }
