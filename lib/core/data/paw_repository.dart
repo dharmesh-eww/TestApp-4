@@ -117,29 +117,3 @@ class PawRepository {
     return const JsonEncoder.withIndent('  ').convert(data);
   }
 }
-).hasMatch(value))throw FormatException('Invalid quiet-hours time.');if(key=='quiet_hours_enabled'&&!['0','1'].contains(value))throw FormatException('Invalid quiet-hours preference.');preferences[key]=value;
-    }
-    final selected=preferences['selected_pet'];
-    if(selected is String&&selected.isNotEmpty&&!petIds.contains(selected))throw FormatException('Selected pet is not present in this backup.');
-    result['__preferences__']=[preferences];
-    return result;
-  }
-
-  Future<void> restore(Map<String,List<Map<String,dynamic>>> records,{required bool replaceExisting}) async {
-    await db.restoreAll(records,replaceExisting:replaceExisting);
-  }
-
-  Future<String> exportAll() async {
-    final data=<String,dynamic>{'schema_version':2,'app':'PawPal','exported_at':DateTime.now().toUtc().toIso8601String()};
-    for(final table in tables){
-      final rows=await list(table);
-      for(final row in rows){if(row.containsKey('photoPath'))row['photoPath']='';if(row.containsKey('attachmentPath'))row['attachmentPath']='';}
-      data[table]=rows;
-    }
-    const keys=['selected_pet','weight_unit','distance_unit','temperature_unit','locale','onboarding_complete','interest_dog','interest_cat','legacy_preferences_migrated','quiet_hours_enabled','quiet_hours_start','quiet_hours_end'];
-    final preferences=<String,String>{};
-    for(final key in keys){final value=await db.getPreference(key);if(value!=null)preferences[key]=value;}
-    data['preferences']=preferences;
-    return const JsonEncoder.withIndent('  ').convert(data);
-  }
-}
