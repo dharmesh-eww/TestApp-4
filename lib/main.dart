@@ -8,6 +8,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final database = LocalDatabase();
   await database.open();
-  try { await LegacyDataMigration.run(database); } catch (_) { /* Keep legacy preferences intact if migration needs recovery. */ }
+  try { await LegacyDataMigration.run(database); } catch (error) { await database.setPreference('legacy_migration_error', 'Legacy pet data could not be migrated automatically. The original local preference backup was retained. Contact support before clearing app data.'); }
   runApp(ProviderScope(overrides: [databaseProvider.overrideWithValue(database)], child: const PawPalApp()));
 }
