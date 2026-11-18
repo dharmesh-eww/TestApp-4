@@ -1,0 +1,10 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';import 'package:flutter_timezone/flutter_timezone.dart';import 'package:timezone/data/latest.dart' as tzdata;import 'package:timezone/timezone.dart' as tz;import '../domain/care_entities.dart';
+class LocalNotificationService{
+ LocalNotificationService._();static final instance=LocalNotificationService._();final _plugin=FlutterLocalNotificationsPlugin();bool _ready=false;
+ Future<void> initialize()async{if(_ready)return;tzdata.initializeTimeZones();final zone=await FlutterTimezone.getLocalTimezone();tz.setLocalLocation(tz.getLocation(zone.identifier));const settings=InitializationSettings(android:AndroidInitializationSettings('@mipmap/ic_launcher'));await _plugin.initialize(settings);_ready=true;}
+ Future<bool> requestPermission()async{await initialize();final android=_plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();return await android?.requestNotificationsPermission()??false;}
+ int _id(String id){var hash=0x811c9dc5;for(final unit in id.codeUnits){hash^=unit;hash=(hash*0x01000193)&0x7fffffff;}return hash;}
+ Future<void> schedule(Reminder reminder)async{await initialize();if(!reminder.enabled||reminder.completed)return;final when=reminder.dueAt;if(when.isBefore(DateTime.now()))return;const details=NotificationDetails(android:AndroidNotificationDetails('pawpal_care','Care reminders',channelDescription:'Owner-created pet care reminders',importance:Importance.defaultImportance,priority:Priority.defaultPriority));final components=switch(reminder.repeat){'daily'=>DateTimeComponents.time,'weekly'=>DateTimeComponents.dayOfWeekAndTime,'monthly'=>DateTimeComponents.dayOfMonthAndTime,_=>null};await _plugin.zonedSchedule(_id(reminder.id),reminder.title,'PawPal reminder · ${reminder.category}',tz.TZDateTime.from(when,tz.local),details,androidScheduleMode:AndroidScheduleMode.inexactAllowWhileIdle,matchDateTimeComponents:components);}
+ Future<void> cancel(String id)async{await initialize();await _plugin.cancel(_id(id));}
+ Future<void> cancelAll()async{await initialize();await _plugin.cancelAll();}
+}
