@@ -1,0 +1,8 @@
+import 'package:flutter/material.dart';
+import '../features/home/presentation/home_screen.dart';
+import '../features/discover/presentation/discover_screen.dart';
+import '../features/pets/presentation/pets_screen.dart';
+import '../features/saved/presentation/saved_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
+class AppShell extends StatefulWidget {const AppShell({super.key});@override State<AppShell> createState()=>_AppShellState();}
+class _AppShellState extends State<AppShell>{int selected=0;static const pages=[HomeScreen(),DiscoverScreen(),PetsScreen(),SavedScreen(),SettingsScreen()];@override Widget build(BuildContext context)=>Scaffold(body:SafeArea(child:IndexedStack(index:selected,children:pages)),bottomNavigationBar:NavigationBar(selectedIndex:selected,onDestinationSelected:(v)=>setState(()=>selected=v),destinations:const[NavigationDestination(icon:Icon(Icons.home_outlined),selectedIcon:Icon(Icons.home),label:'Home'),NavigationDestination(icon:Icon(Icons.explore_outlined),selectedIcon:Icon(Icons.explore),label:'Discover'),NavigationDestination(icon:Icon(Icons.pets_outlined),selectedIcon:Icon(Icons.pets),label:'My Pets'),NavigationDestination(icon:Icon(Icons.bookmark_border),selectedIcon:Icon(Icons.bookmark),label:'Saved'),NavigationDestination(icon:Icon(Icons.settings_outlined),selectedIcon:Icon(Icons.settings),label:'Settings') ]));}
